@@ -96,3 +96,43 @@ def test_sensitive_local_artifacts_are_gitignored():
     for expected in ('.env.*', 'local-token', '*.sqlite', '*.pem', '*.key', '*.enc'):
         assert expected in contents
     assert '!.env.example' in contents
+
+
+def test_staged_index_detects_secret_not_in_worktree(tmp_path):
+    import subprocess
+    from tools.prepare_github import check_staged
+    root = fixture_repo(tmp_path)
+    subprocess.run(['git', 'init', '-q', str(root)], check=True)
+    staged = root / 'notes.txt'
+    staged.write_text('gh' + 'p_' + 'Z' * 40)
+    subprocess.run(['git', '-C', str(root), 'add', '.'], check=True)
+    staged.write_text('safe after staging')
+    assert check(root)['preflight'] == 'passed'
+    with pytest.raises(RuntimeError, match='possible staged github credential'):
+        check_staged(root)
+
+
+def test_staged_index_blocks_forced_private_file(tmp_path):
+    import subprocess
+    from tools.prepare_github import check_staged
+    root = fixture_repo(tmp_path)
+    subprocess.run(['git', 'init', '-q', str(root)], check=True)
+    (root / '.env').write_text('placeholder')
+    subprocess.run(['git', '-C', str(root), 'add', '.'], check=True)
+    with pytest.raises(RuntimeError, match='private staged filename'):
+        check_staged(root)
+
+
+def test_clean_staged_index_passes(tmp_path):
+    import subprocess
+    from tools.prepare_github import check_staged
+    root = fixture_repo(tmp_path)
+    subprocess.run(['git', 'init', '-q', str(root)], check=True)
+    subprocess.run(['git', '-C', str(root), 'add', '.'], check=True)
+    assert check_staged(root)['staged_entries_checked'] == len(REQUIRED)
+
+
+def test_relative_path_display_is_posix_even_for_windows_paths():
+    """Diagnostics and security-test patterns need OS-neutral slashes."""
+    from pathlib import PureWindowsPath
+    assert PureWindowsPath(r'validation\old.log').as_posix() == 'validation/old.log'

@@ -1,3 +1,27 @@
+## v1.3.5 — verify the *deployed* checkout before native CI (2026-11-21)
+
+- [x] Start from the complete v1.3.4 ZIP and inspect the latest uploaded nine-job GitHub Actions logs, including Windows Python 3.13 heartbeat failure.
+- [x] Add version/fix marker validation to CI to detect partial source uploads before pytest.
+- [x] Replace short scheduler-dependent heartbeat timing with observed lease renewal and add regression coverage.
+- [x] Run local Linux full regression with source candidate: 217 passed, 14 skipped.
+- [ ] **P0:** owner must copy the full **contents** of the updated archive to the actual GitHub Desktop repository root, review staged files, and verify the changed source files on GitHub after Push. Do not infer completeness from the commit title.
+- [ ] **P0:** run all 9 GitHub-hosted Windows/macOS/Ubuntu Python jobs for the new SHA; record checkout guard result and any remaining native failures.
+- [ ] **P1:** instrument real macOS descendant process cleanup; `EPERM` is an uncertainty, not an isolation guarantee.
+- [ ] **P1:** reproduce and characterize 300 ms lease heartbeat under Windows load separately from the stable unit test.
+- [ ] **P2:** native package builds, disposable PostgreSQL/Docker fault injection, pinned QEMU guest, long soak, independent Secrets/Audit review.
+
+## v1.3.4 — observed hosted matrix failure remediation (2026-11-21)
+
+- [x] Use the newest available source ZIP (v1.3.3) and inspect the actual uploaded nine-job GitHub Actions logs.
+- [x] Fix macOS process-group `EPERM` handling without treating uncertain descendant cleanup as verified containment.
+- [x] Make repository publication-check diagnostic paths OS-neutral to avoid Windows-only regex failures.
+- [x] Add regression cases and preserve all existing test coverage.
+- [ ] **Highest priority:** push this source candidate only after owner review, and obtain new green results for all nine hosted Windows/macOS/Linux Python jobs.
+- [ ] Investigate whether a denied process-group signal leaves descendants running on real macOS; run an instrumented non-privileged process-tree test and document limits before claiming cancellation containment.
+- [ ] Validate native EXE/APP/AppImage on corresponding hosts; run PostgreSQL/Docker lifecycle faults, a pinned QEMU guest and extended soak tests under explicit resource budgets.
+- [ ] Address Starlette/httpx deprecation warning by testing a supported dependency upgrade; avoid unreviewed major-version changes.
+- [ ] Review release source, CI logs, secrets, permissions and Git history; do not claim the source candidate is production safe.
+
 ## v1.3.1 — GitHub launch readiness (2026-11-21)
 
 - [x] Extend offline pre-publication scanning to historical validation text, nested credentials, secret patterns and symlinks; strengthen git/docker ignore rules.

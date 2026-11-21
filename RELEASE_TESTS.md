@@ -1,4 +1,4 @@
-> **Current release:** For v1.3.1 local test results see [RELEASE_TESTS_1.3.1.md](RELEASE_TESTS_1.3.1.md). The below material is historical evidence for v1.2.9 and earlier; do not count it as current cross-platform CI.
+> **Current candidate:** For v1.3.4 local checks and limits see [RELEASE_TESTS_1.3.4.md](RELEASE_TESTS_1.3.4.md). The material below is historical evidence for v1.2.9 and earlier and does not certify current cross-platform CI.
 
 # AgentFlow Runtime 1.2.9 — independently run local validation (2026-11-21)
 

@@ -26,21 +26,52 @@ def _stop_tree(proc, job=None):
                 proc.wait(timeout=5);return False
         return proc.returncode in (0,1,124)
     if os.name=='posix':
-        # macOS / other POSIX hosts: stop the original process group, not merely
-        # its leader. A process that deliberately detaches is NOT contained.
-        finished_cleanly=proc.poll()==0
-        try:
-            os.killpg(proc.pid,signal.SIGTERM)
-            time.sleep(.05)
-            os.killpg(proc.pid,signal.SIGKILL)
-        except ProcessLookupError:pass
-        proc.wait(timeout=5)
-        # A normal exit is sufficient for trusted/local adapter success, not
-        # an attestation of all descendants. Cancellation stays uncertain.
-        return finished_cleanly
+        return _stop_posix_group(proc)
     if proc.poll() is None:proc.kill()
     proc.wait(timeout=5)
     return False
+
+
+
+def _stop_posix_group(proc):
+    """Best-effort macOS/POSIX process-group cleanup; never attest descendants.
+
+    A group signal may fail with EPERM if a descendant changes ownership or
+    the runner denies signalling it. The caller must still reap the leader and
+    preserve the original timeout exception; cancellation remains uncertain.
+    Only the Popen leader is eligible for the fallback signal.
+    """
+    finished_cleanly = proc.poll() == 0
+    group_uncertain = False
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        try:
+            os.killpg(proc.pid, sig)
+        except ProcessLookupError:
+            # No signalable process group with this ID; it might have exited.
+            break
+        except PermissionError:
+            # EPERM does not prove the group was terminated. Avoid hiding the
+            # adapter's TimeoutExpired with an unrelated cleanup exception.
+            group_uncertain = True
+            break
+        if sig == signal.SIGTERM:
+            time.sleep(.05)
+    if proc.poll() is None:
+        # The group may have been inaccessible or terminated only partly.
+        # Target the process object, never a guessed PID/process group.
+        try:
+            proc.kill()
+        except ProcessLookupError:
+            pass
+        except PermissionError as exc:
+            raise RuntimeError('cannot terminate adapter leader after group cleanup') from exc
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError('adapter leader still alive after process-group cleanup') from exc
+    # Even when the leader exited cleanly, detached descendants are not
+    # contained by process groups; EPERM makes the outcome less certain.
+    return finished_cleanly and not group_uncertain
 
 
 def _launch(args, root, input_file, temp, stdout=None, *, stderr=subprocess.DEVNULL):

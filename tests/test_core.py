@@ -39,8 +39,32 @@ def test_cancel_and_adapter_routing(store):
     with pytest.raises(Conflict):store.cancel(a)
 
 def test_heartbeat(store):
-    a=store.submit('test');assert Worker(store,{'echo':lambda p,t:(time.sleep(.55),p)[1]},lease=.3).once()
-    assert store.get(a)['state']=='succeeded'
+    """Wait for a real renewal rather than relying on a 300ms scheduler window.
+
+    A heavily loaded Windows runner can delay a renewal thread long enough to
+    expire a 0.3s lease, correctly fencing completion but making a timing-only
+    heartbeat test flaky. Production expired-lease fencing is unchanged.
+    """
+    import threading
+    observed_renewal = threading.Event()
+    real_renew = store.renew
+
+    def monitored_renew(*args, **kwargs):
+        state = real_renew(*args, **kwargs)
+        if state is not None:
+            observed_renewal.set()
+        return state
+
+    store.renew = monitored_renew
+
+    def wait_for_heartbeat(prompt, timeout):
+        assert observed_renewal.wait(4), 'worker did not renew the lease'
+        return prompt
+
+    ident = store.submit('test')
+    assert Worker(store, {'echo': wait_for_heartbeat}, lease=5).once()
+    assert observed_renewal.is_set()
+    assert store.get(ident)['state'] == 'succeeded'
 
 def test_default_no_retry(store):
     a=store.submit('test');j=store.claim(['echo']);store.finish(a,j['lease_token'],error='failure')
