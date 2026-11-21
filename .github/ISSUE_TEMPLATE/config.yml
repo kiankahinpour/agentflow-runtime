@@ -1,0 +1,4 @@
+# Maintain a freeform option for unusual documentation and compatibility issues.
+blank_issues_enabled: true
+# Security reports must never include private exploit details in a public issue.
+# The maintainer should enable GitHub private vulnerability reporting in Settings.

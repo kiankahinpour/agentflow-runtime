@@ -1,8 +1,8 @@
-> **v1.3.5 Public Beta source candidate — not yet pushed to GitHub.** Uploaded Actions logs show the public commit `2c8d34b` still executing the older process-cleanup implementation despite its v1.3.4 commit caption. Verify the actual checkout content and CI source-guard step after an owner-operated push. This is experimental local-first software, not a certified sandbox or production security guarantee. See [RELEASE_1.3.5.md](RELEASE_1.3.5.md), [SECURITY.md](SECURITY.md), and [MANUAL_GITHUB_RELEASE.md](MANUAL_GITHUB_RELEASE.md).
+> **Public beta v1.3.5** — [GitHub release](https://github.com/kiankahinpour/agentflow-runtime/releases/tag/v1.3.5-beta). The owner-provided GitHub Actions CI #4 evidence for commit `4a50fc2` shows all nine Ubuntu/Windows/macOS × Python 3.10/3.12/3.13 jobs passing, plus successful PostgreSQL integration and Docker smoke workflows. This validates the tested scenarios, not production security or untrusted workload isolation. See [RELEASE_1.3.5.md](RELEASE_1.3.5.md), [SECURITY.md](SECURITY.md), and [ROADMAP.md](ROADMAP.md).
 
 # AgentFlow Runtime — experimental local-first task orchestration
 
-**Release evidence:** The supplied 2026-11-21 GitHub Actions logs for public SHA `2c8d34b` show 3/3 Ubuntu jobs passing, 3/3 macOS jobs failing on the old POSIX `PermissionError` cleanup, and 3/3 Windows jobs failing on old-style path diagnostics; Windows Python 3.13 also hit a timing-sensitive heartbeat test. This source candidate adds an explicit CI checkout version/fix-marker guard and a renewal-event heartbeat test. Local Linux validation: 217 passed, 14 skipped. **No new hosted Windows/macOS CI results are yet verified for v1.3.5.** Real PostgreSQL fault injection, Docker isolation, QEMU guest boot, native releases, live providers and multi-tenant isolation remain unverified for this candidate.
+**Public beta validation:** Per CI run: Ubuntu 217 passed / 14 skipped; Windows 201 passed / 30 skipped; macOS 205 passed / 26 skipped; zero failures across the nine jobs. Skipped tests are not successes. Native unsigned executable distribution, long soak, independent threat-model review, pinned QEMU guest and real AI-provider executions remain separately unverified.
 
 **Safety boundary:** Use only for a single trusted local operator with localhost binding. Unauthorized POSTs to `/api/` are rejected before body parsing, and authenticated API POST/PUT/PATCH bodies are capped at 2 MiB. This is not a distributed DoS defense; GitHub webhooks have their existing independent limit. SQLite prompts/results are plaintext and external coding agents execute with the privileges of their configured process. Do **not** expose the API publicly or permit untrusted multi-user agent execution.
 
@@ -236,7 +236,7 @@ v0.9.0 adds a database-backed API rate limiter with tenant-scoped actor fingerpr
 
 Operators can run subprocess crash injection (`tools/fault_worker_smoke.py`), disposable Docker network fault injection (`tools/network_fault_smoke.py`), long multiprocess soak (`tools/soak.py`) and native Windows validation (`Validate_Windows.bat`). CI definitions exist for PostgreSQL, Docker, Windows and on-demand soak; the actual hosted runs must be performed by the operator. The new VM module is a working integration contract **without a shipped guest image**, not a guaranteed sandbox; trusted host plugins and external agents are not automatically constrained by its policy helpers. Restricted tenant mode continues to prohibit external adapters.
 
-See [v0.9 operator matrix](OPERATIONS_090.md), [VM setup](VM_SETUP.md), [manual GitHub release](MANUAL_GITHUB_RELEASE.md), and [security limitations](SECURITY.md). Neither GitHub nor PyPI has been modified.
+See [v0.9 operator matrix](OPERATIONS_090.md), [VM setup](VM_SETUP.md), [manual GitHub release](MANUAL_GITHUB_RELEASE.md), and [security limitations](SECURITY.md). The source is public on GitHub. This repository does not publish packages to PyPI automatically.
 
 ## Native desktop build and validation
 
@@ -255,3 +255,7 @@ python tools/benchmark_windows.py
 `agentflow-desktop` provides a local-only server + trusted Echo worker, opening a browser dashboard; it does **not** enable cloud agents. `agentflow-desktop --self-test` verifies local API submission and worker completion without downloading models or contacting outside services. The source launcher is available on Windows, Linux and macOS; **native verified binaries have not been generated in this build environment**.
 
 To build unsigned Windows EXE, macOS `.app`, Linux onedir and optional AppImage **on their respective native hosts**, follow [NATIVE_BUILDS.md](NATIVE_BUILDS.md). A manual, build-only [GitHub Actions workflow](.github/workflows/native-builds.yml) is included. See [REAL_VALIDATION.md](REAL_VALIDATION.md) for which real infrastructure checks still need to be executed and [COMMUNITY_PILOT.md](COMMUNITY_PILOT.md) for an ethical early-adopter pilot.
+
+## Contributing to the public beta
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for offline development, testing, and pull request expectations, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards. Please use the GitHub [issue templates](https://github.com/kiankahinpour/agentflow-runtime/issues/new/choose) for reproducible bugs and feature proposals. **Do not post vulnerabilities, credentials, proprietary data or exploit details in public issues**: follow [SECURITY.md](SECURITY.md). This release is intended for a single trusted local operator, not hostile multi-user execution.

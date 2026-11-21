@@ -1,3 +1,10 @@
+## Unreleased — community governance and GitHub setup (no runtime version change)
+
+- Refresh README release status after the owner published `v1.3.5-beta` and obtained 9/9 green cross-platform GitHub Actions jobs.
+- Add contributor code of conduct, structured issue/PR templates, dependabot configuration, and an owner-operated security/branch-rules checklist.
+- Minimize GitHub Actions checkout credential persistence and explicitly set read-only permission for PostgreSQL integration.
+- No API, worker, adapter, database, distribution, or release-tag changes. Owner configuration and public issue creation remain manual.
+
 ## v1.3.5 — source checkout verification and heartbeat test reliability (2026-11-21)
 
 - Analyze the **new** full GitHub Actions log bundle from public commit `2c8d34b`: the hosted checkout still executed the old POSIX cleanup despite the v1.3.4 caption; Windows Python 3.13 additionally recorded a timing-sensitive heartbeat failure.

@@ -1,15 +1,37 @@
 ---
 name: Bug report
-about: Report a reproducible runtime defect
+about: Report a reproducible defect using synthetic data
+title: "bug: "
+labels: ["bug"]
 ---
-**Runtime version / OS / Python**
 
-**Adapter and CLI version (no secrets)**
+## What happened?
 
-**Reproduction steps**
+A concise description of the incorrect behavior.
 
-**Expected / actual behavior**
+## Expected behavior
 
-**Redacted logs and state history**
+What should have happened?
 
-Do not post tokens, private prompts, database files or proprietary source.
+## Reproduction steps
+
+1.
+2.
+3.
+
+## Environment
+
+- AgentFlow version or Git commit:
+- OS and version:
+- Python version:
+- Adapter / CLI version (if relevant):
+- SQLite or PostgreSQL (if relevant):
+
+## Actual evidence (redacted)
+
+Provide the exact test command, exit code, or minimal synthetic traceback. Mark any untested steps **NOT VERIFIED**.
+
+## Safety checklist
+
+- [ ] I used synthetic data and removed tokens, credentials, private prompts, host identifiers, and proprietary logs.
+- [ ] This report does not disclose a security vulnerability or reproducible exploit. (If it does, stop and use [SECURITY.md](../../SECURITY.md).)

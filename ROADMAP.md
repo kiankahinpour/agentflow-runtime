@@ -1,3 +1,12 @@
+## Community readiness after v1.3.5 Public Beta (operator setup, not a new release)
+
+- [x] Public tag `v1.3.5-beta` and owner-provided CI evidence: 9/9 GitHub Actions matrix jobs passed at commit `4a50fc2`; the PostgreSQL integration and Docker smoke workflows passed.
+- [x] Add improved contribution instructions, issue and PR templates, dependency-update configuration and maintainer security checklist in a proposed post-release community patch.
+- [ ] Owner to enable private vulnerability reporting, security scanning/alerts and branch rules in GitHub settings; **not verifiable or changeable from the source archive**.
+- [ ] Owner to review and create evidence-backed public Issues from the accompanying drafts; no issues are claimed created.
+- [ ] Verify community patch CI on a new commit/PR; do not retroactively modify the `v1.3.5-beta` tag.
+- [ ] Continue real macOS descendant cleanup verification, provider safety review, native artifacts, disposable PostgreSQL/Docker fault injection, QEMU pinned guest and long soak.
+
 ## v1.3.5 — verify the *deployed* checkout before native CI (2026-11-21)
 
 - [x] Start from the complete v1.3.4 ZIP and inspect the latest uploaded nine-job GitHub Actions logs, including Windows Python 3.13 heartbeat failure.

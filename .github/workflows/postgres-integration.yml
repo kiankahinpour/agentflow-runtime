@@ -1,4 +1,6 @@
 name: PostgreSQL integration
+permissions:
+  contents: read
 on:
   push:
   pull_request:
@@ -21,6 +23,8 @@ jobs:
       AGENTFLOW_TEST_POSTGRES_DSN: postgresql://agentflow_ci:test-only-password@localhost:5432/agentflow_ci
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
