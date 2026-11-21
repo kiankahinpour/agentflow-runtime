@@ -1,0 +1,43 @@
+name: Disposable QEMU reference guest (manual opt-in)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  boot-guest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require operator-maintained pinned guest image URL and hash
+        env:
+          BASE_URL: ${{ vars.AGENTFLOW_GUEST_BASE_URL }}
+          BASE_SHA256: ${{ vars.AGENTFLOW_GUEST_BASE_SHA256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$BASE_URL" && test -n "$BASE_SHA256"
+          [[ "$BASE_URL" == https://cloud.debian.org/* ]]
+          [[ "$BASE_SHA256" =~ ^[a-f0-9]{64}$ ]]
+          echo "BASE_URL=$BASE_URL" >> "$GITHUB_ENV"
+          echo "BASE_SHA256=$BASE_SHA256" >> "$GITHUB_ENV"
+      - name: Install QEMU and libguestfs on Ubuntu runner
+        run: sudo apt-get update && sudo apt-get install -y qemu-system-x86 qemu-utils libguestfs-tools
+      - name: Fetch and verify trusted Debian cloud image
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --proto '=https' --tlsv1.2 -fL --max-time 120 "$BASE_URL" -o /tmp/base.qcow2
+          echo "$BASE_SHA256  /tmp/base.qcow2" | sha256sum -c -
+      - name: Build guest and boot with no network
+        shell: bash
+        run: |
+          set -euo pipefail
+          guest/build_guest.sh /tmp/base.qcow2 /tmp/agentflow.qcow2
+          GUEST_SHA256="$(sha256sum /tmp/agentflow.qcow2 | cut -d' ' -f1)"
+          python tools/qemu_guest_smoke.py --image /tmp/agentflow.qcow2 --sha256 "$GUEST_SHA256" --allow-real-boot --timeout 300

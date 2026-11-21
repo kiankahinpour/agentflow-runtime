@@ -1,0 +1,37 @@
+name: Manual multi-hour worker crash soak (local Echo only)
+on:
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: "Duration 60..7200 seconds, e.g. 3600"
+        required: true
+        default: '3600'
+        type: string
+permissions:
+  contents: read
+jobs:
+  soak:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 135
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e .
+      - name: Validate requested test duration and run chaos soak
+        shell: bash
+        env:
+          SOAK_SECONDS: ${{ inputs.seconds }}
+        run: |
+          set -euo pipefail
+          [[ "$SOAK_SECONDS" =~ ^[0-9]+$ ]] && [ "$SOAK_SECONDS" -ge 60 ] && [ "$SOAK_SECONDS" -le 7200 ]
+          python tools/chaos_soak.py --seconds "$SOAK_SECONDS" --workers 4 --rate 10 --kill-every 30 > chaos-soak-result.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chaos-soak-results
+          path: chaos-soak-result.json
+          if-no-files-found: ignore

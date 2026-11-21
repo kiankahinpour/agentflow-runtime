@@ -1,0 +1,5 @@
+[
+  {"name":"intake","prompt":"Collect and classify a reported issue.","adapter":"echo"},
+  {"name":"review","prompt":"Review the proposed fix. No external effects are needed in this demo.","adapter":"echo","depends_on":["intake"],"approval":true},
+  {"name":"summary","prompt":"Prepare an operator-facing status report.","adapter":"word-count","depends_on":["review"],"approval":true}
+]

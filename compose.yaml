@@ -1,0 +1,55 @@
+# Single-host demo control plane. Docker Compose does NOT sandbox hostile tenants.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: agentflow
+      POSTGRES_USER: agentflow
+      POSTGRES_PASSWORD: ${AGENTFLOW_DB_PASSWORD:?set AGENTFLOW_DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentflow -d agentflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    networks: [internal]
+  api:
+    build: .
+    command: ["agentflow", "serve", "--port", "8787"]
+    environment:
+      AGENTFLOW_POSTGRES_DSN: postgresql://agentflow:${AGENTFLOW_DB_PASSWORD:?set AGENTFLOW_DB_PASSWORD}@postgres:5432/agentflow
+      AGENTFLOW_CONTAINER_BIND: "1"
+      AGENTFLOW_TOKEN: ${AGENTFLOW_TOKEN:?set AGENTFLOW_TOKEN}
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=64m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    ports:
+      - "127.0.0.1:8787:8787"
+    depends_on:
+      postgres: {condition: service_healthy}
+    networks: [internal]
+    restart: unless-stopped
+  worker:
+    build: .
+    command: ["agentflow", "worker", "--workflows"]
+    environment:
+      AGENTFLOW_POSTGRES_DSN: postgresql://agentflow:${AGENTFLOW_DB_PASSWORD:?set AGENTFLOW_DB_PASSWORD}@postgres:5432/agentflow
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=64m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 128
+    depends_on:
+      postgres: {condition: service_healthy}
+    networks: [internal]
+    restart: unless-stopped
+networks:
+  internal:
+    internal: true
+volumes:
+  pgdata:

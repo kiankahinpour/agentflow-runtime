@@ -1,0 +1,50 @@
+# Manual artifact build only. No GitHub Release or PyPI publication is performed.
+name: Manual distribution artifacts (no publishing)
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Exact source version (e.g. 1.3.1)"
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  validate:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e '.[test,server]'
+      - name: Offline source preflight
+        run: python tools/prepare_github.py --json
+      - run: python -m pytest -q
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check requested version against canonical source version
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: python tools/check_release_version.py
+      - run: python -m pip install build twine
+      - run: python -m build
+      - run: python -m twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-distributions
+          path: dist/
+          if-no-files-found: error

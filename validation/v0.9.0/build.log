@@ -1,0 +1,10 @@
+WARNING: The directory '/home/oai/.cache/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Processing /mnt/data/afr-v090/agentflow-runtime
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: agentflow-durable
+  Building wheel for agentflow-durable (pyproject.toml): started
+  Building wheel for agentflow-durable (pyproject.toml): finished with status 'done'
+  Created wheel for agentflow-durable: filename=agentflow_durable-0.9.0-py3-none-any.whl size=51881 sha256=d803f900a324e1027fec99ba0aa7e4e4621ed65a823d3d256a58ebfed25efc3a
+  Stored in directory: /tmp/pip-ephem-wheel-cache-yn03wc8o/wheels/db/94/6b/b43d5107e36178ddb410d007cb827b2b255a727c0ac725f12e
+Successfully built agentflow-durable

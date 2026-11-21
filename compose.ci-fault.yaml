@@ -1,0 +1,5 @@
+# TEST-ONLY overlay. Never deploy alongside production or expose publicly.
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:${AGENTFLOW_TEST_PG_PORT:-55432}:5432"

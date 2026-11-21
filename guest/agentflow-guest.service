@@ -1,0 +1,24 @@
+[Unit]
+Description=AgentFlow serial reference guest (deterministic demo only)
+After=dev-ttyS0.device
+Requires=dev-ttyS0.device
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -u /opt/agentflow/agentflow_guest.py
+User=agentflow
+Group=agentflow
+StandardInput=tty
+StandardOutput=tty
+StandardError=null
+TTYPath=/dev/ttyS0
+TTYReset=no
+TTYVHangup=no
+Restart=no
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

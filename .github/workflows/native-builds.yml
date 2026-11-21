@@ -1,0 +1,64 @@
+name: Native desktop build artifacts (manual, no publishing)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            label: linux-x64
+          - runner: windows-2025
+            label: windows-x64
+          - runner: macos-15
+            label: macos-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install bundler and runtime
+        run: python -m pip install -e '.[server]' 'pyinstaller>=6,<7'
+      - name: Verify operator-pinned appimagetool (optional Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          TOOL_URL: ${{ vars.AGENTFLOW_APPIMAGETOOL_URL }}
+          TOOL_SHA256: ${{ vars.AGENTFLOW_APPIMAGETOOL_SHA256 }}
+        run: |
+          set -euo pipefail
+          if [ -n "$TOOL_URL" ] || [ -n "$TOOL_SHA256" ]; then
+            test -n "$TOOL_URL" && [[ "$TOOL_URL" == https://github.com/AppImage/appimagetool/releases/* ]]
+            [[ "$TOOL_SHA256" =~ ^[a-f0-9]{64}$ ]]
+            curl --proto '=https' --tlsv1.2 -fsSL "$TOOL_URL" -o "$RUNNER_TEMP/appimagetool"
+            echo "$TOOL_SHA256  $RUNNER_TEMP/appimagetool" | sha256sum -c -
+            chmod +x "$RUNNER_TEMP/appimagetool"
+            echo "AGENTFLOW_APPIMAGETOOL=$RUNNER_TEMP/appimagetool" >> "$GITHUB_ENV"
+          fi
+      - name: Build and native end-to-end smoke-check
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${AGENTFLOW_APPIMAGETOOL:-}" ]; then
+            python tools/build_native.py --out-dir dist-native --appimagetool "$AGENTFLOW_APPIMAGETOOL"
+          else
+            python tools/build_native.py --out-dir dist-native
+          fi
+      - name: Upload draft native artifacts only
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentflow-${{ github.sha }}-${{ matrix.label }}-unsigned
+          path: |
+            dist-native/AgentFlow/
+            dist-native/AgentFlow.app/
+            dist-native/AgentFlow-Linux-AppDir.tar.gz
+            dist-native/AgentFlow-Linux.AppImage
+            dist-native/native-build-report.json
+          if-no-files-found: error

@@ -1,0 +1,19 @@
+{
+  "jobs": 50,
+  "workers": 2,
+  "production_seconds": 5,
+  "wall_seconds": 5.252,
+  "states": {
+    "succeeded": 50
+  },
+  "duplicate_claims": 0,
+  "claims": 50,
+  "integrity": "ok",
+  "exit_codes": [
+    0,
+    0
+  ],
+  "platform": "Linux",
+  "python": "3.13.5",
+  "workload": "paced synthetic echo, independent OS processes"
+}

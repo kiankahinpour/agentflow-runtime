@@ -1,0 +1,36 @@
+{
+  "release": "1.1.0",
+  "date": "2026-11-21",
+  "environment": "Linux, Python 3.13.5",
+  "pytest": {
+    "passed": 125,
+    "skipped": 6,
+    "failed": 0,
+    "duration_seconds": 59.86,
+    "note": "final full regression after sequential desktop launcher startup fix"
+  },
+  "installed_wheel_local_echo": "PASSED",
+  "browser_chromium_offline_bridge": "PASSED",
+  "browser_chromium_direct_localhost": "BLOCKED_BY_ADMINISTRATOR",
+  "chaos_short": {
+    "seconds": 4,
+    "submitted": 20,
+    "succeeded": 19,
+    "uncertain": 1,
+    "duplicate_claims": 0
+  },
+  "native_windows": "UNVERIFIED",
+  "native_macos": "UNVERIFIED",
+  "docker_postgres": "UNVERIFIED",
+  "qemu_boot": "UNVERIFIED",
+  "model_providers_authenticated": "UNVERIFIED",
+  "pyinstaller_native_binaries": "NOT_BUILT",
+  "publication": "NOT_PERFORMED",
+  "user_adoption": "UNVERIFIED",
+  "desktop_startup_race": {
+    "initial": "ONE_INTERMITTENT_FAILURE",
+    "fix": "SEQUENTIAL_API_THEN_WORKER",
+    "repeated_self_tests": 10,
+    "result": "PASSED"
+  }
+}

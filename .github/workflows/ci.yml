@@ -1,0 +1,27 @@
+name: CI
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ['3.10', '3.12', '3.13']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -e ".[test,server,secrets]"
+      - name: Offline pre-publication source scan
+        run: python tools/prepare_github.py --json
+      - run: python -m pytest -q
+      - name: Cross-platform launch preflight
+        run: python tools/start_local.py --check-only
+      - name: Native localhost API + worker
+        run: python tools/launcher_smoke.py
+      - name: Native Windows Job Objects verification
+        if: runner.os == 'Windows'
+        run: python tools/windows_native_smoke.py

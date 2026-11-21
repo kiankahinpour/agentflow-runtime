@@ -1,0 +1,70 @@
+F...................................                                     [100%]
+=================================== FAILURES ===================================
+_______________ test_public_source_tree_passes_offline_preflight _______________
+
+    def test_public_source_tree_passes_offline_preflight():
+>       result = check()
+                 ^^^^^^^
+
+tests/test_github_publication_preflight.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/mnt/data/agentflow_release_prep_131/agentflow-runtime')
+
+    def check(root: Path = ROOT) -> dict:
+        root = Path(root)
+        missing = [name for name in REQUIRED if not (root / name).is_file()]
+        if missing:
+            raise RuntimeError('required publication files missing: ' + ', '.join(missing))
+        risks = []
+        scanned_text = 0
+        examined_files = 0
+        for current, dirs, filenames in os.walk(root, topdown=True, followlinks=False):
+            current = Path(current)
+            for dirname in list(dirs):
+                path = current / dirname
+                if path.is_symlink():
+                    risks.append(f'{path.relative_to(root)}: symlinked directory')
+                    dirs.remove(dirname)
+                elif dirname in GENERATED_DIRS or dirname.endswith('.egg-info'):
+                    dirs.remove(dirname)
+            for filename in filenames:
+                path = current / filename
+                rel = path.relative_to(root)
+                examined_files += 1
+                lower = filename.lower()
+                if path.is_symlink():
+                    risks.append(f'{rel}: symlinked file')
+                    continue
+                if (lower in PRIVATE_NAMES or (lower.startswith('.env.') and lower != '.env.example')
+                        or path.suffix.lower() in PRIVATE_SUFFIXES):
+                    risks.append(f'{rel}: private file name or extension')
+                    continue
+                if path.suffix.lower() not in TEXT_SUFFIXES and filename not in ('Dockerfile', 'SHA256SUMS.txt'):
+                    continue
+                try:
+                    data = path.read_bytes()
+                except OSError as exc:
+                    risks.append(f'{rel}: cannot read file ({type(exc).__name__})')
+                    continue
+                if b'\x00' in data:
+                    risks.append(f'{rel}: unexpected binary data in text file')
+                    continue
+                scanned_text += 1
+                for label, pattern in PATTERNS.items():
+                    if pattern.search(data):
+                        risks.append(f'{rel}: possible {label}')
+        release_workflow = (root / '.github/workflows/release.yml').read_text(encoding='utf-8').lower()
+        for marker in PUBLISH_MARKERS:
+            if marker in release_workflow:
+                risks.append(f'.github/workflows/release.yml: publishing-related marker ({marker})')
+        if risks:
+>           raise RuntimeError('GitHub preflight blocked:\n' + '\n'.join(sorted(set(risks))))
+E           RuntimeError: GitHub preflight blocked:
+E           tests/test_github_publication_preflight.py: possible private key
+
+tools/prepare_github.py:96: RuntimeError
+=========================== short test summary info ============================
+FAILED tests/test_github_publication_preflight.py::test_public_source_tree_passes_offline_preflight - RuntimeError: GitHub preflight blocked:
+tests/test_github_publication_preflight.py: possible private key
+1 failed, 35 passed in 2.87s

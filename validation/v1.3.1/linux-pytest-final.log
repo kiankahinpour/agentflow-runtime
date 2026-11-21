@@ -1,0 +1,14 @@
+........................................................................ [ 33%]
+..............................................s..........s.............. [ 66%]
+.................s..s.............s..........s.............sss.sssss...  [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_v050.py:76: native Windows Job Object test
+SKIPPED [1] tests/test_v060.py:59: requires delegated cgroup v2
+SKIPPED [1] tests/test_v080.py:125: requires live PostgreSQL DSN
+SKIPPED [1] tests/test_v080_pg_integration.py:20: needs disposable PostgreSQL service
+SKIPPED [1] tests/test_v090_pg_integration.py:6: requires disposable PostgreSQL
+SKIPPED [1] tests/test_v100_pg_integration.py:6: requires real disposable PostgreSQL
+SKIPPED [3] tests/test_windows_validation.py:140: Windows process handles and Job Objects required
+SKIPPED [4] tests/test_windows_validation.py:209: Windows Job Object integration
+SKIPPED [1] tests/test_windows_validation.py:239: Windows Job Object integration
+201 passed, 14 skipped in 73.24s (0:01:13)

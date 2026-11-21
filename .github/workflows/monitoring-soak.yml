@@ -1,0 +1,35 @@
+name: Manual long soak (synthetic only)
+on:
+  workflow_dispatch:
+    inputs:
+      seconds:
+        description: "Duration (60 to 7200 seconds)"
+        required: true
+        default: "3600"
+        type: string
+permissions:
+  contents: read
+jobs:
+  soak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 135
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e .
+      - name: Validate duration and run synthetic soak
+        shell: bash
+        env:
+          SECONDS: ${{ inputs.seconds }}
+        run: |
+          set -euo pipefail
+          [[ "$SECONDS" =~ ^[0-9]+$ ]] && [ "$SECONDS" -ge 60 ] && [ "$SECONDS" -le 7200 ]
+          python tools/soak.py --seconds "$SECONDS" --workers 4 --rate 20 > soak-result.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: synthetic-soak-result
+          path: soak-result.json
+          if-no-files-found: ignore

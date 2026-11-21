@@ -1,0 +1,19 @@
+name: Disposable PostgreSQL Docker fault lab
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-postgres-crash:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e '.[test,postgres]'
+      - name: Start, crash and recover disposable PG container
+        run: python tools/ci_postgres_fault.py --allow-disposable-docker-test --include-network-partition
