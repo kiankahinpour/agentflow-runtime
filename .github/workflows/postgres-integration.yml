@@ -22,7 +22,7 @@ jobs:
     env:
       AGENTFLOW_TEST_POSTGRES_DSN: postgresql://agentflow_ci:test-only-password@localhost:5432/agentflow_ci
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: actions/setup-python@v5
