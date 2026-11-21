@@ -27,7 +27,7 @@ jobs:
           set -euo pipefail
           [[ "$SECONDS" =~ ^[0-9]+$ ]] && [ "$SECONDS" -ge 60 ] && [ "$SECONDS" -le 7200 ]
           python tools/soak.py --seconds "$SECONDS" --workers 4 --rate 20 > soak-result.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: synthetic-soak-result
